@@ -32,7 +32,7 @@ public class openApiConfig {
                                 "para transacciones y autenticación de usuarios."))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8081")
+                                .url("http://localhost:8080")
                                 .description("Servidor de Desarrollo")
                 ));
     }
