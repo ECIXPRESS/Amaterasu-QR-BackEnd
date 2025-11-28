@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AmaterasuQrBackEndApplication {
+public class ApplicationQr{
 
 	public static void main(String[] args) {
-		SpringApplication.run(AmaterasuQrBackEndApplication.class, args);
+		SpringApplication.run(ApplicationQr.class, args);
 	}
 
 }
