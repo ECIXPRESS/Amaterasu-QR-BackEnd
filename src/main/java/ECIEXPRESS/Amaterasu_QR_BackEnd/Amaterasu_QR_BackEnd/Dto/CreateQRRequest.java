@@ -1,6 +1,6 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Dto;
 
-import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.OrderStatus;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.Enums.OrderStatus;
 
 /**
  * Request body used to generate a QR for an order.

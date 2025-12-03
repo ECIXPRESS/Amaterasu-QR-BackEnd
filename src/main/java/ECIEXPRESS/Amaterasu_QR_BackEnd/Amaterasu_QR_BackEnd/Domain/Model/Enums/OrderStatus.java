@@ -1,4 +1,4 @@
-package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model;
+package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.Enums;
 
 /**
  * Enumeration defining the valid business states of an order.
@@ -6,8 +6,7 @@ package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model;
  * traceable order statuses are assigned to QR records.
  */
 public enum OrderStatus {
-    CANCELLED,
     DELIVERED,
-    PAYED,
+    PENDING,
     REFUNDED
 }

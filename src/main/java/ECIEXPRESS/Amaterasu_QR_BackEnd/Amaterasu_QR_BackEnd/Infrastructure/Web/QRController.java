@@ -1,6 +1,6 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web;
 
-import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.CreateQRUseCase;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.UseCases.CreateQRUseCase;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.QRCode;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.QRGenerator;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Dto.CreateQRRequest;

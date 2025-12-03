@@ -1,4 +1,4 @@
-package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application;
+package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.UseCases;
 
 /**
  * Input port (use case) responsible for validating a decoded or encoded QR string.
