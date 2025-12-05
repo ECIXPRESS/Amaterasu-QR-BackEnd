@@ -7,10 +7,11 @@ import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.D
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.QRController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -19,13 +20,19 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(QRController.class)
+@WebMvcTest(
+        controllers = QRController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.REGEX,
+                pattern = "ECIEXPRESS\\.Amaterasu_QR_BackEnd\\.Amaterasu_QR_BackEnd\\.Config\\..*"
+        )
+)
 class QRControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private QRUseCases qrUseCases;
 
     @Autowired
@@ -63,6 +70,18 @@ class QRControllerTest {
     }
 
     @Test
+    void createQrCode_EmptyOrderId() throws Exception {
+        // Arrange
+        String invalidRequest = "{\"orderId\": \"\"}"; // Empty orderId
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/qr/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createQrCode_ServiceThrowsException() throws Exception {
         // Arrange
         CreateQrCodeRequest request = new CreateQrCodeRequest(validOrderId);
@@ -74,7 +93,7 @@ class QRControllerTest {
         mockMvc.perform(post("/api/v1/qr/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -120,6 +139,18 @@ class QRControllerTest {
     }
 
     @Test
+    void validateQrCode_EmptyQRCode() throws Exception {
+        // Arrange
+        String invalidRequest = "{\"encodedQrCode\": \"\"}"; // Empty encodedQrCode
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/qr/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void validateQrCode_InvalidJSON() throws Exception {
         // Arrange
         String invalidJson = "{invalid json}";
@@ -143,6 +174,6 @@ class QRControllerTest {
         mockMvc.perform(post("/api/v1/qr/validate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isInternalServerError());
     }
 }

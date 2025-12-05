@@ -37,11 +37,11 @@ public class QRCode {
             log.error("QR Code is not valid");
             throw new Exception("QR Code is not valid");
         }
-        if(this.paymentMethodType == PaymentMethodType.CASH && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).after(DateUtils.parseDate(new Date().toString(), DateUtils.TIMESTAMP_FORMAT))){
+        if(this.paymentMethodType == PaymentMethodType.CASH && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).after(new Date())) {
             log.error("Receipt generated date can't be after today if paying in cash");
             throw new Exception("QR Code is not valid");
         }
-        if(this.paymentMethodType != PaymentMethodType.CASH  && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).before(DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT))){
+        if(this.paymentMethodType != PaymentMethodType.CASH  && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).before(DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT))) {
             log.error("Receipt generated date can't be before payment processed at");
             throw new Exception("QR Code is not valid");
         }
