@@ -39,20 +39,17 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>
-			**/config/**,
+            lombok.*,
             **/Config/**,
-            **/configuration/**,
             **/Dto/**,
             **/Model/**,
             **/Entity/**,
             **/Entities/**,
             **/Exception/**,
-            **/Exceptions/**,
             **/*Application.java,
-            **/*ApplicationQr.java,
-            **/*Configuration.java,
-            **/*Config.java,
-            **/OpenApiConfig.java
+            **/Utils/**,
+            **/Enums/**,
+            **/Mappers/**
         </sonar.coverage.exclusions>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.exclusions>
@@ -218,20 +215,17 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>**/config/**</exclude>
+                                <exclude>lombok.*</exclude>
                                 <exclude>**/Config/**</exclude>
-                                <exclude>**/configuration/**</exclude>
                                 <exclude>**/Dto/**</exclude>
                                 <exclude>**/Model/**</exclude>
-                                <exclude>**/entity/**</exclude>
-                                <exclude>**/entities/**</exclude>
                                 <exclude>**/Exception/**</exclude>
-                                <exclude>**/Exceptions/**</exclude>
-                                <exclude>**/*Application.class</exclude>
-                                <exclude>**/*ApplicationQr.class</exclude>
-                                <exclude>**/*Configuration.class</exclude>
-                                <exclude>**/*Config.class</exclude>
-                                <exclude>**/*$Builder.class</exclude>
+                                <exclude>**/Utils/**</exclude>
+                                <exclude>**/Enums/**</exclude>
+                                <exclude>**/Mappers/**</exclude>
+                                <exclude>**/ApplicationReceipts.class</exclude>
+                                <exclude>**/Entities/**</exclude>
+                                <exclude>**/Entity/**</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -243,20 +237,17 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>**/config/**</exclude>
+                                <exclude>lombok.*</exclude>
                                 <exclude>**/Config/**</exclude>
-                                <exclude>**/configuration/**</exclude>
                                 <exclude>**/Dto/**</exclude>
                                 <exclude>**/Model/**</exclude>
-                                <exclude>**/entity/**</exclude>
-                                <exclude>**/entities/**</exclude>
                                 <exclude>**/Exception/**</exclude>
-                                <exclude>**/Exceptions/**</exclude>
-                                <exclude>**/*Application.class</exclude>
-                                <exclude>**/*ApplicationQr.class</exclude>
-                                <exclude>**/*Configuration.class</exclude>
-                                <exclude>**/*Config.class</exclude>
-                                <exclude>**/*$Builder.class</exclude>
+                                <exclude>**/Utils/**</exclude>
+                                <exclude>**/Enums/**</exclude>
+                                <exclude>**/Mappers/**</exclude>
+                                <exclude>**/ApplicationReceipts.class</exclude>
+                                <exclude>**/Entities/**</exclude>
+                                <exclude>**/Entity/**</exclude>
                             </excludes>
                             <rules>
                                 <rule>
