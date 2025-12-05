@@ -9,6 +9,9 @@ import java.util.Date;
 @Component
 public class DateUtils {
 
+    private DateUtils() {
+    }
+
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
     public static final String ISO_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DISPLAY_DATE_FORMAT = "dd/MM/yyyy";

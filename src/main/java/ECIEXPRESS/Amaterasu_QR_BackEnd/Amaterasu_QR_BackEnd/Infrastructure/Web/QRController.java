@@ -56,7 +56,7 @@ public class QRController {
             boolean isValid = qrUseCases.ValidateQrCode(request);
             return isValid ?
                     ResponseEntity.ok().build() :
-                    ResponseEntity.badRequest().build();
+                    ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
