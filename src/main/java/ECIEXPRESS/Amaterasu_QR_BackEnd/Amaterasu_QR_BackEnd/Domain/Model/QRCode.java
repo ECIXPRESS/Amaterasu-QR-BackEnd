@@ -25,7 +25,7 @@ public class QRCode {
     private ReceiptStatus receiptStatus;
     private OrderStatus orderStatus;
 
-    public void validateQrCOde (String qrCode) throws Exception {
+    public void validateQrCode(String qrCode) throws Exception {
         List<String> qrCodeList = Arrays.stream(qrCode.split("_")).toList();
         this.orderId = qrCodeList.get(0);
         this.receiptGeneratedDate = qrCodeList.get(1);
@@ -83,6 +83,5 @@ public class QRCode {
                 throw new Exception("Payment processed at can't be after receipt generated date");
             }
         }
-        return orderId+"_"+receiptGeneratedDate+"_"+paymentProcessedAt+"_"+paymentMethodType+"_"+receiptStatus+"_"+orderStatus;
     }
 }

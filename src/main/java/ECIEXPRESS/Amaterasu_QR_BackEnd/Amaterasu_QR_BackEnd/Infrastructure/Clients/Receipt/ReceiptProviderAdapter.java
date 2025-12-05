@@ -1,7 +1,6 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt;
 
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.ReceiptProvider;
-import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt.Dto.ReceiptRequests.GetQrReceiptRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt.Dto.ReceiptResponses.GetQrReceiptResponse;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt.Mappers.ReceiptProviderMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,36 +25,112 @@ public class ReceiptProviderAdapter implements ReceiptProvider {
     @Override
     public String getQrCodeByOrderId(String orderId) {
         try {
-            log.info("Processing QrCode for order: {}", orderId);
-            GetQrReceiptRequest receiptRequest = ReceiptProviderMapper.mapToGetQrReceiptRequest(orderId);
+            log.info("Getting QR code for order: {}", orderId);
 
             HttpHeaders headers = createHeaders();
-            HttpEntity<GetQrReceiptRequest> entity = new HttpEntity<>(receiptRequest, headers);
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            String url = buildUrl("/order/{orderId}/qr", orderId);
 
             ResponseEntity<GetQrReceiptResponse> response = restTemplate.exchange(
-                    baseUrl+basePath, HttpMethod.POST, entity, GetQrReceiptResponse.class);
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    GetQrReceiptResponse.class,
+                    orderId);
 
-            GetQrReceiptResponse receiptResponse = response.getBody();
-
-            if(receiptResponse == null){
-                log.error("Receipt response is null for order {}", orderId);
-                throw new RuntimeException("Receipt response is null for order "+orderId);
+            if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
+                log.error("Failed to get QR code for order: {}. Status: {}", orderId, response.getStatusCode());
+                throw new RuntimeException("Failed to get QR code for order: " + orderId);
             }
 
-            log.info("Request response received for order {}", orderId);
+            GetQrReceiptResponse receiptResponse = response.getBody();
+            log.info("Successfully retrieved QR code for order: {}", orderId);
 
             return ReceiptProviderMapper.mapQrResponseToString(receiptResponse);
 
         } catch (Exception e) {
-            log.error("Error processing QrCode for order {} Error: {}",orderId, e.getMessage());
-            throw new RuntimeException("Error processing QrCode for order "+orderId+" Error: "+e.getMessage());
+            log.error("Error getting QR code for order {}: {}", orderId, e.getMessage());
+            throw new RuntimeException("Error getting QR code for order " + orderId + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateToDelivered(String orderId) {
+        try {
+            log.info("Updating receipt to delivered for order: {}", orderId);
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            String url = buildUrl("/{orderId}/deliver", orderId);
+
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PATCH,
+                    entity,
+                    Void.class,
+                    orderId);
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("Failed to update receipt to delivered for order: {}. Status: {}",
+                        orderId, response.getStatusCode());
+                throw new RuntimeException("Failed to update receipt to delivered for order: " + orderId);
+            }
+
+            log.info("Successfully updated receipt to delivered for order: {}", orderId);
+
+        } catch (Exception e) {
+            log.error("Error updating receipt to delivered for order {}: {}", orderId, e.getMessage());
+            throw new RuntimeException("Error updating receipt to delivered for order " + orderId + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateToPayed(String orderId) {
+        try {
+            log.info("Updating receipt to payed for order: {}", orderId);
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            String url = buildUrl("/{orderId}/pay", orderId);
+
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PATCH,
+                    entity,
+                    Void.class,
+                    orderId);
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("Failed to update receipt to payed for order: {}. Status: {}",
+                        orderId, response.getStatusCode());
+                throw new RuntimeException("Failed to update receipt to payed for order: " + orderId);
+            }
+
+            log.info("Successfully updated receipt to payed for order: {}", orderId);
+
+        } catch (Exception e) {
+            log.error("Error updating receipt to payed for order {}: {}", orderId, e.getMessage());
+            throw new RuntimeException("Error updating receipt to payed for order " + orderId + ": " + e.getMessage(), e);
         }
     }
 
     private HttpHeaders createHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
         return headers;
+    }
+
+    private String buildUrl(String pathTemplate, String orderId) {
+        String cleanBasePath = basePath.endsWith("/") ? basePath.substring(0, basePath.length() - 1) : basePath;
+        String cleanPathTemplate = pathTemplate.startsWith("/") ? pathTemplate : "/" + pathTemplate;
+
+        return String.format("%s%s%s",
+                baseUrl,
+                cleanBasePath,
+                cleanPathTemplate);
     }
 }
