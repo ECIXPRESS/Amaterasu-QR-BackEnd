@@ -1,9 +1,7 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +14,7 @@ import java.util.List;
  * Documentación disponible en: /swagger-ui.html
  */
 @Configuration
-public class openApiConfig {
+public class OpenApiConfig {
 
     @Value("${spring.application.name}")
     private String applicationName;

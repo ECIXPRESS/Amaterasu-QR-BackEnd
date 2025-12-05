@@ -1,0 +1,3 @@
+microservices:
+  receipt:
+    url: http://receipt-service.dev.eciexpress.com

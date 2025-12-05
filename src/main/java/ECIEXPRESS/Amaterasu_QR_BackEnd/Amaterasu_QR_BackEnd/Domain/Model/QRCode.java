@@ -25,7 +25,7 @@ public class QRCode {
     private ReceiptStatus receiptStatus;
     private OrderStatus orderStatus;
 
-    public String validateQrCOde (String qrCode) throws Exception {
+    public void validateQrCOde (String qrCode) throws Exception {
         List<String> qrCodeList = Arrays.stream(qrCode.split("_")).toList();
         this.orderId = qrCodeList.get(0);
         this.receiptGeneratedDate = qrCodeList.get(1);
@@ -45,13 +45,6 @@ public class QRCode {
             log.error("Receipt generated date can't be before payment processed at");
             throw new Exception("QR Code is not valid");
         }
-
-        this.orderId = receipt.getOrderId();
-        this.paymentMethodType = receipt.getPaymentMethod().getPaymentMethodType();
-        this.receiptGeneratedDate = receipt.getTimeStamps().getReceiptGeneratedDate();
-        this.paymentProcessedAt = receipt.getTimeStamps().getPaymentProcessedAt();
-        this.receiptStatus = receipt.getReceiptStatus();
-        this.orderStatus = receipt.getOrderStatus();
         if(this.receiptStatus == ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.Enums.ReceiptStatus.DELIVERED){
             log.error("Receipt can't be delivered in creation");
             throw new Exception("Receipt can't be delivered in creation");
