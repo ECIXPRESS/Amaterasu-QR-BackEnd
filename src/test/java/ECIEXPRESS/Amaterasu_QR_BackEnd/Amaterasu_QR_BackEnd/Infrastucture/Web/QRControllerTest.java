@@ -85,7 +85,7 @@ class QRControllerTest {
         mockMvc.perform(post("/api/v1/qr/validate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
