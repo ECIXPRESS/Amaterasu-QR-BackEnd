@@ -69,7 +69,7 @@ class QRServiceTest {
         QRValidationException exception = assertThrows(QRValidationException.class,
                 () -> qrService.ValidateQrCode(request));
 
-        assertEquals("Unexpected error during QR validation", exception.getMessage());
+        assertEquals("Failed to validate QR code: Decryption failed", exception.getMessage());
         verify(encryptionUtil, times(1)).decrypt(encryptedQR);
         verify(receiptProvider, never()).updateToPayed(anyString());
         verify(receiptProvider, never()).updateToDelivered(anyString());
