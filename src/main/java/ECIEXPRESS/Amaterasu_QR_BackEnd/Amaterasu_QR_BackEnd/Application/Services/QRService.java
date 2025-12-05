@@ -7,6 +7,7 @@ import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.ReceiptP
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.CreateQrCodeRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.ValidateQRRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrResponses.CreateQrCodeResponse;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Utils.SimpleEncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class QRService implements QRUseCases {
     private final ReceiptProvider receiptProvider;
+
     @Override
     public boolean ValidateQrCode(ValidateQRRequest request) {
         try {
+            String qrCodeText = request.encodedQrCode();
+            String decryptedText = SimpleEncryptionUtil.decrypt(qrCodeText);
+
             QRCode qrcode = new QRCode();
-            qrcode.validateQrCode(request.encodedQrCode());
+            qrcode.validateQrCode(decryptedText);
+
             receiptProvider.updateToPayed(qrcode.getOrderId());
             receiptProvider.updateToDelivered(qrcode.getOrderId());
+            log.info("QR code validated and receipt updated for order: {}", qrcode.getOrderId());
             return true;
         } catch (Exception e) {
             log.error("Error validating QR code: {}", e.getMessage());
@@ -32,14 +39,18 @@ public class QRService implements QRUseCases {
 
     @Override
     public CreateQrCodeResponse createQrCode(CreateQrCodeRequest request) {
-        String qrCode = receiptProvider.getQrCodeByOrderId(request.orderId());
-        QRCode code = new QRCode();
         try {
-            code.validateQrCode(qrCode);
-            return QrCodeMapper.QrStringToCreateQrCodeResponse(qrCode);
+            String qrCodeString = receiptProvider.getQrCodeByOrderId(request.orderId());
+
+            QRCode qrcode = new QRCode();
+            qrcode.validateQrCode(qrCodeString);
+
+            String encryptedQR = SimpleEncryptionUtil.encrypt(qrCodeString);
+            log.info("QR code created and validated for order: {}", request.orderId());
+            return QrCodeMapper.QrStringToCreateQrCodeResponse(encryptedQR);
         } catch (Exception e) {
-            log.error("Error validating QR code: {}", e.getMessage());
-            throw new RuntimeException("Error validating QR code: " + e.getMessage());
+            log.error("Error creating QR code for order {}: {}", request.orderId(), e.getMessage());
+            throw new RuntimeException("Error creating QR code for order " + request.orderId() + ": " + e.getMessage());
         }
     }
 }

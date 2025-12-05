@@ -31,6 +31,11 @@ springdoc:
     version: 1.0.0
     description: API para gestión de códigos QR en ECIEXPRESS
 
+qr:
+  encryption:
+    password: "ECIEXPRESS_QR_PASSWORD_2025"
+    salt: "QR_SALT_ECIEXPRESS"
+
 # Configuración de Microservicios Externos
 microservices:
   receipt:
