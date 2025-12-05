@@ -27,8 +27,7 @@ public class QRService implements QRUseCases {
         }
 
         try {
-            String qrCodeText = request.encodedQrCode();
-            String decryptedText = encryptionUtil.decrypt(qrCodeText);
+            String decryptedText = encryptionUtil.decrypt(request.encodedQrCode());
 
             if (decryptedText == null || decryptedText.trim().isEmpty()) {
                 throw new QRValidationException("Decrypted QR code text is empty");
@@ -42,11 +41,9 @@ public class QRService implements QRUseCases {
             log.info("QR code validated and receipt updated for order: {}", qrcode.getOrderId());
             return true;
         } catch (IllegalArgumentException e) {
-            log.error("Invalid argument in QR validation: {}", e.getMessage());
-            throw e;
-        } catch (QRValidationException e) {
-            log.error("QR validation failed: {}", e.getMessage());
-            throw e;
+            throw new QRValidationException("Invalid QR code format: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw new QRValidationException("Failed to validate QR code: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Unexpected error validating QR code: {}", e.getMessage());
             throw new QRValidationException("Unexpected error during QR validation", e);
