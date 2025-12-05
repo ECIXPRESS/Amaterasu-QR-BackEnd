@@ -120,9 +120,12 @@ public class ReceiptProviderAdapter implements ReceiptProvider {
     private String buildUrl(String pathTemplate, String orderId) {
         String cleanBasePath = basePath.endsWith("/") ? basePath.substring(0, basePath.length() - 1) : basePath;
         String cleanPathTemplate = pathTemplate.startsWith("/") ? pathTemplate : "/" + pathTemplate;
+
+        String finalPath = cleanPathTemplate.replace("{orderId}", orderId);
+
         return String.format("%s%s%s",
                 baseUrl,
                 cleanBasePath,
-                cleanPathTemplate);
+                finalPath);
     }
 }

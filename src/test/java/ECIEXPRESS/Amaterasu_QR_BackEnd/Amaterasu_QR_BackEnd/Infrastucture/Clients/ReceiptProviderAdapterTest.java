@@ -40,14 +40,16 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_Success() {
-        String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
+        // The actual URL will have the orderId already replaced
+        String expectedUrl = baseUrl + basePath + "/order/" + orderId + "/qr";
 
         GetQrReceiptResponse mockResponse = new GetQrReceiptResponse(qrCode);
         ResponseEntity<GetQrReceiptResponse> responseEntity =
                 new ResponseEntity<>(mockResponse, HttpStatus.OK);
 
+        // Mock with actual arguments
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -58,7 +60,7 @@ class ReceiptProviderAdapterTest {
 
         assertEquals(qrCode, result);
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -67,12 +69,14 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NotFound() {
-        String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
+        String expectedUrl = baseUrl + basePath + "/order/" + orderId + "/qr";
+
+        // Create response with NOT_FOUND status and null body
         ResponseEntity<GetQrReceiptResponse> responseEntity =
-                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -84,7 +88,7 @@ class ReceiptProviderAdapterTest {
 
         assertEquals("Failed to get QR code for order: " + orderId + ". Status: 404 NOT_FOUND", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -93,12 +97,14 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NullResponseBody() {
-        String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
+        String expectedUrl = baseUrl + basePath + "/order/" + orderId + "/qr";
+
+        // Create response with OK status but null body
         ResponseEntity<GetQrReceiptResponse> responseEntity =
-                new ResponseEntity<>(null, HttpStatus.OK);
+                ResponseEntity.ok(null);
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -110,7 +116,7 @@ class ReceiptProviderAdapterTest {
 
         assertEquals("Empty response body for order: " + orderId, exception.getMessage());
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -119,10 +125,10 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NetworkError() {
-        String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
+        String expectedUrl = baseUrl + basePath + "/order/" + orderId + "/qr";
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -135,7 +141,7 @@ class ReceiptProviderAdapterTest {
         assertEquals("Network error getting QR code for order: " + orderId, exception.getMessage());
         assertNotNull(exception.getCause());
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
@@ -144,11 +150,11 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToPayed_Success() {
-        String urlTemplate = baseUrl + basePath + "/{orderId}/pay";
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        String expectedUrl = baseUrl + basePath + "/" + orderId + "/pay";
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -158,7 +164,7 @@ class ReceiptProviderAdapterTest {
         assertDoesNotThrow(() -> receiptProviderAdapter.updateToPayed(orderId));
 
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -167,11 +173,13 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToPayed_Failure() {
-        String urlTemplate = baseUrl + basePath + "/{orderId}/pay";
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String expectedUrl = baseUrl + basePath + "/" + orderId + "/pay";
+
+        // Use BAD_REQUEST with .build() to create the response
+        ResponseEntity<Void> responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -183,7 +191,7 @@ class ReceiptProviderAdapterTest {
 
         assertEquals("Failed to update receipt to payed for order: " + orderId + ". Status: 400 BAD_REQUEST", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -192,11 +200,11 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToDelivered_Success() {
-        String urlTemplate = baseUrl + basePath + "/{orderId}/deliver";
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        String expectedUrl = baseUrl + basePath + "/" + orderId + "/deliver";
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -206,7 +214,7 @@ class ReceiptProviderAdapterTest {
         assertDoesNotThrow(() -> receiptProviderAdapter.updateToDelivered(orderId));
 
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -215,11 +223,13 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToDelivered_Failure() {
-        String urlTemplate = baseUrl + basePath + "/{orderId}/deliver";
-        ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String expectedUrl = baseUrl + basePath + "/" + orderId + "/deliver";
+
+        // Use BAD_REQUEST with .build() to create the response
+        ResponseEntity<Void> responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
         when(restTemplate.exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
@@ -231,7 +241,7 @@ class ReceiptProviderAdapterTest {
 
         assertEquals("Failed to update receipt to delivered for order: " + orderId + ". Status: 400 BAD_REQUEST", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
-                eq(urlTemplate),
+                eq(expectedUrl),
                 eq(HttpMethod.PATCH),
                 any(HttpEntity.class),
                 eq(Void.class),
