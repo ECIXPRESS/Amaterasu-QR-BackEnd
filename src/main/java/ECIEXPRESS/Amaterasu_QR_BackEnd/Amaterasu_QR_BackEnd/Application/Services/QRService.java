@@ -7,7 +7,7 @@ import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.ReceiptP
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.CreateQrCodeRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.ValidateQRRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrResponses.CreateQrCodeResponse;
-import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Utils.SimpleEncryptionUtil;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Utils.EncryptionUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,12 +17,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class QRService implements QRUseCases {
     private final ReceiptProvider receiptProvider;
+    private final EncryptionUtil encryptionUtil;
 
     @Override
     public boolean ValidateQrCode(ValidateQRRequest request) {
         try {
             String qrCodeText = request.encodedQrCode();
-            String decryptedText = SimpleEncryptionUtil.decrypt(qrCodeText);
+            String decryptedText = encryptionUtil.decrypt(qrCodeText);
 
             QRCode qrcode = new QRCode();
             qrcode.validateQrCode(decryptedText);
@@ -45,7 +46,7 @@ public class QRService implements QRUseCases {
             QRCode qrcode = new QRCode();
             qrcode.validateQrCode(qrCodeString);
 
-            String encryptedQR = SimpleEncryptionUtil.encrypt(qrCodeString);
+            String encryptedQR = encryptionUtil.encrypt(qrCodeString);
             log.info("QR code created and validated for order: {}", request.orderId());
             return QrCodeMapper.QrStringToCreateQrCodeResponse(encryptedQR);
         } catch (Exception e) {

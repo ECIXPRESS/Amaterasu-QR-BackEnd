@@ -34,7 +34,7 @@ springdoc:
 qr:
   encryption:
     password: "ECIEXPRESS_QR_PASSWORD_2025"
-    salt: "QR_SALT_ECIEXPRESS"
+    salt: "1234567890abcdef"
 
 # Configuración de Microservicios Externos
 microservices:
