@@ -12,6 +12,11 @@ on:
       - main
       - 'feature/**'
 
+env:
+  SPRING_PROFILES_ACTIVE: test
+  QR_ENCRYPTION_PASSWORD: ${{ secrets.QR_PASSWORD }}
+  QR_ENCRYPTION_SALT: ${{ secrets.QR_SALT }}
+
 jobs:
   test-and-quality:
     runs-on: ubuntu-latest
@@ -38,12 +43,16 @@ jobs:
       - name: Build + Test + Coverage
         run: mvn -B clean verify
         env:
+          QR_ENCRYPTION_PASSWORD: ${{ secrets.QR_PASSWORD }}
+          QR_ENCRYPTION_SALT: ${{ secrets.QR_SALT }}
           SPRING_PROFILES_ACTIVE: test
 
       - name: SonarQube Analysis
         run: mvn -B sonar:sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          QR_ENCRYPTION_PASSWORD: ${{ secrets.QR_PASSWORD }}
+          QR_ENCRYPTION_SALT: ${{ secrets.QR_SALT }}
 
       - name: Publish JaCoCo HTML Report
         if: always()

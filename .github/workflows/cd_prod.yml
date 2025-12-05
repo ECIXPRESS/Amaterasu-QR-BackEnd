@@ -6,6 +6,11 @@ on:
       - main 
       #- feature/devops    
 
+env:
+  ENVIRONMENT: prod
+  QR_ENCRYPTION_PASSWORD: ${{ secrets.QR_PASSWORD }}
+  QR_ENCRYPTION_SALT: ${{ secrets.QR_SALT }}
+
 jobs:
   build-and-deploy:
     name: Build, Push Image, and Deploy
@@ -23,6 +28,10 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build Docker image
+        env:
+          QR_ENCRYPTION_PASSWORD: ${{ secrets.QR_PASSWORD }}
+          QR_ENCRYPTION_SALT: ${{ secrets.QR_SALT }}
+
         run: |
           echo "ACR_LOGIN_SERVER = ${{ secrets.ACR_LOGIN_SERVER }}"
           IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/qr-service"
