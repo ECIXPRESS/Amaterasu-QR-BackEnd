@@ -57,44 +57,22 @@ public class ReceiptProviderAdapter implements ReceiptProvider {
 
     @Override
     public void updateToDelivered(String orderId) {
-        try {
-            log.info("Updating receipt to delivered for order: {}", orderId);
-
-            HttpHeaders headers = createHeaders();
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-            String url = buildUrl("/{orderId}/deliver", orderId);
-
-            ResponseEntity<Void> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.PATCH,
-                    entity,
-                    Void.class,
-                    orderId);
-
-            if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Failed to update receipt to delivered for order: {}. Status: {}",
-                        orderId, response.getStatusCode());
-                throw new RuntimeException("Failed to update receipt to delivered for order: " + orderId);
-            }
-
-            log.info("Successfully updated receipt to delivered for order: {}", orderId);
-
-        } catch (Exception e) {
-            log.error("Error updating receipt to delivered for order {}: {}", orderId, e.getMessage());
-            throw new RuntimeException("Error updating receipt to delivered for order " + orderId + ": " + e.getMessage(), e);
-        }
+        updateReceiptStatus(orderId, "deliver", "delivered");
     }
 
     @Override
     public void updateToPayed(String orderId) {
+        updateReceiptStatus(orderId, "pay", "payed");
+    }
+
+    private void updateReceiptStatus(String orderId, String endpoint, String status) {
         try {
-            log.info("Updating receipt to payed for order: {}", orderId);
+            log.info("Updating receipt to {} for order: {}", status, orderId);
 
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            String url = buildUrl("/{orderId}/pay", orderId);
+            String url = buildUrl("/{orderId}/" + endpoint, orderId);
 
             ResponseEntity<Void> response = restTemplate.exchange(
                     url,
@@ -104,16 +82,16 @@ public class ReceiptProviderAdapter implements ReceiptProvider {
                     orderId);
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Failed to update receipt to payed for order: {}. Status: {}",
-                        orderId, response.getStatusCode());
-                throw new RuntimeException("Failed to update receipt to payed for order: " + orderId);
+                log.error("Failed to update receipt to {} for order: {}. Status: {}",
+                        status, orderId, response.getStatusCode());
+                throw new RuntimeException("Failed to update receipt to " + status + " for order: " + orderId);
             }
 
-            log.info("Successfully updated receipt to payed for order: {}", orderId);
+            log.info("Successfully updated receipt to {} for order: {}", status, orderId);
 
         } catch (Exception e) {
-            log.error("Error updating receipt to payed for order {}: {}", orderId, e.getMessage());
-            throw new RuntimeException("Error updating receipt to payed for order " + orderId + ": " + e.getMessage(), e);
+            log.error("Error updating receipt to {} for order {}: {}", status, orderId, e.getMessage());
+            throw new RuntimeException("Error updating receipt to " + status + " for order " + orderId + ": " + e.getMessage(), e);
         }
     }
 

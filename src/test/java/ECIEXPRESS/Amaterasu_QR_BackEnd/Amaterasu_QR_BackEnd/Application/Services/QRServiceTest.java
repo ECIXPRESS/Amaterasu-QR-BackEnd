@@ -1,6 +1,7 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.Services;
 
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.ReceiptProvider;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Exception.QRValidationException;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.CreateQrCodeRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.ValidateQRRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrResponses.CreateQrCodeResponse;
@@ -65,10 +66,10 @@ class QRServiceTest {
                 .thenThrow(new RuntimeException("Decryption failed"));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        QRValidationException exception = assertThrows(QRValidationException.class,
                 () -> qrService.ValidateQrCode(request));
 
-        assertTrue(exception.getMessage().contains("Error validating QR code"));
+        assertEquals("Unexpected error during QR validation", exception.getMessage());
         verify(encryptionUtil, times(1)).decrypt(encryptedQR);
         verify(receiptProvider, never()).updateToPayed(anyString());
         verify(receiptProvider, never()).updateToDelivered(anyString());
@@ -83,10 +84,10 @@ class QRServiceTest {
         when(encryptionUtil.decrypt(encryptedQR)).thenReturn(invalidQR);
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        Exception exception = assertThrows(Exception.class,
                 () -> qrService.ValidateQrCode(request));
 
-        assertTrue(exception.getMessage().contains("Error validating QR code"));
+        assertTrue(exception.getMessage().contains("QR Code is not valid"));
         verify(encryptionUtil, times(1)).decrypt(encryptedQR);
         verify(receiptProvider, never()).updateToPayed(anyString());
         verify(receiptProvider, never()).updateToDelivered(anyString());

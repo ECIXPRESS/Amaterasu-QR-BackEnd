@@ -4,6 +4,7 @@ import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.Mappers.
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.Ports.QRUseCases;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.QRCode;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Port.ReceiptProvider;
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Exception.QRValidationException;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.CreateQrCodeRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.ValidateQRRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrResponses.CreateQrCodeResponse;
@@ -21,9 +22,17 @@ public class QRService implements QRUseCases {
 
     @Override
     public boolean ValidateQrCode(ValidateQRRequest request) {
+        if (request == null || request.encodedQrCode() == null || request.encodedQrCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid QR code request: encoded QR code cannot be null or empty");
+        }
+
         try {
             String qrCodeText = request.encodedQrCode();
             String decryptedText = encryptionUtil.decrypt(qrCodeText);
+
+            if (decryptedText == null || decryptedText.trim().isEmpty()) {
+                throw new QRValidationException("Decrypted QR code text is empty");
+            }
 
             QRCode qrcode = new QRCode();
             qrcode.validateQrCode(decryptedText);
@@ -32,9 +41,15 @@ public class QRService implements QRUseCases {
             receiptProvider.updateToDelivered(qrcode.getOrderId());
             log.info("QR code validated and receipt updated for order: {}", qrcode.getOrderId());
             return true;
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid argument in QR validation: {}", e.getMessage());
+            throw e;
+        } catch (QRValidationException e) {
+            log.error("QR validation failed: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            log.error("Error validating QR code: {}", e.getMessage());
-            throw new RuntimeException("Error validating QR code: " + e.getMessage());
+            log.error("Unexpected error validating QR code: {}", e.getMessage());
+            throw new QRValidationException("Unexpected error during QR validation", e);
         }
     }
 
