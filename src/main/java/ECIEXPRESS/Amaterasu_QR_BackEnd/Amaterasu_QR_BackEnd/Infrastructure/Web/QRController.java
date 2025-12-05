@@ -4,11 +4,6 @@ import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Application.Ports.QR
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.CreateQrCodeRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrRequests.ValidateQRRequest;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Web.Dto.QrResponses.CreateQrCodeResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v1/qr")
@@ -28,27 +24,43 @@ public class QRController {
 
     private final QRUseCases qrUseCases;
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createQrCode(@Valid @RequestBody CreateQrCodeRequest request) {
+    @PostMapping(
+            value = "/create",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CreateQrCodeResponse> createQrCode(
+            @Valid @RequestBody CreateQrCodeRequest request) {
         try {
             CreateQrCodeResponse response = qrUseCases.createQrCode(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            // Log the error
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error creating QR code: " + e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error creating QR code: " + e.getMessage(),
+                    e
+            );
         }
     }
 
-    @PostMapping("/validate")
-    public ResponseEntity<?> validateQrCode(@Valid @RequestBody ValidateQRRequest request) {
+    @PostMapping(
+            value = "/validate",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> validateQrCode(
+            @Valid @RequestBody ValidateQRRequest request) {
         try {
             boolean isValid = qrUseCases.ValidateQrCode(request);
-            return ResponseEntity.ok(isValid);
+            return isValid ?
+                    ResponseEntity.ok().build() :
+                    ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            // Log the error
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error validating QR code: " + e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error validating QR code: " + e.getMessage(),
+                    e
+            );
         }
     }
 }
