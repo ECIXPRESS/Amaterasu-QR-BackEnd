@@ -63,7 +63,7 @@ public class QRService implements QRUseCases {
             return QrCodeMapper.QrStringToCreateQrCodeResponse(encryptedQR);
         } catch (Exception e) {
             log.error("Error creating QR code for order {}: {}", request.orderId(), e.getMessage());
-            throw new RuntimeException("Error creating QR code for order " + request.orderId() + ": " + e.getMessage());
+            throw new QRValidationException("Error creating QR code for order " + request.orderId() + ": " + e.getMessage());
         }
     }
 }

@@ -1,5 +1,6 @@
 package ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastucture.Clients;
 
+import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Exception.ExternalServiceException;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt.Dto.ReceiptResponses.GetQrReceiptResponse;
 import ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Infrastructure.Clients.Receipt.ReceiptProviderAdapter;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,14 +34,12 @@ class ReceiptProviderAdapterTest {
 
     @BeforeEach
     void setUp() {
-        // Use ReflectionTestUtils to set private fields
         ReflectionTestUtils.setField(receiptProviderAdapter, "baseUrl", baseUrl);
         ReflectionTestUtils.setField(receiptProviderAdapter, "basePath", basePath);
     }
 
     @Test
     void getQrCodeByOrderId_Success() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
 
         GetQrReceiptResponse mockResponse = new GetQrReceiptResponse(qrCode);
@@ -54,10 +54,8 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act
         String result = receiptProviderAdapter.getQrCodeByOrderId(orderId);
 
-        // Assert
         assertEquals(qrCode, result);
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
@@ -69,7 +67,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NotFound() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
         ResponseEntity<GetQrReceiptResponse> responseEntity =
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -82,11 +79,10 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ExternalServiceException exception = assertThrows(ExternalServiceException.class,
                 () -> receiptProviderAdapter.getQrCodeByOrderId(orderId));
 
-        assertTrue(exception.getMessage().contains("Failed to get QR code for order"));
+        assertEquals("Failed to get QR code for order: " + orderId + ". Status: 404 NOT_FOUND", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.GET),
@@ -97,7 +93,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NullResponseBody() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
         ResponseEntity<GetQrReceiptResponse> responseEntity =
                 new ResponseEntity<>(null, HttpStatus.OK);
@@ -110,11 +105,10 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ExternalServiceException exception = assertThrows(ExternalServiceException.class,
                 () -> receiptProviderAdapter.getQrCodeByOrderId(orderId));
 
-        assertTrue(exception.getMessage().contains("Failed to get QR code for order"));
+        assertEquals("Empty response body for order: " + orderId, exception.getMessage());
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.GET),
@@ -125,7 +119,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void getQrCodeByOrderId_NetworkError() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/order/{orderId}/qr";
 
         when(restTemplate.exchange(
@@ -134,13 +127,13 @@ class ReceiptProviderAdapterTest {
                 any(HttpEntity.class),
                 eq(GetQrReceiptResponse.class),
                 eq(orderId))
-        ).thenThrow(new RuntimeException("Network error"));
+        ).thenThrow(new RestClientException("Network error"));
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ExternalServiceException exception = assertThrows(ExternalServiceException.class,
                 () -> receiptProviderAdapter.getQrCodeByOrderId(orderId));
 
-        assertTrue(exception.getMessage().contains("Error getting QR code for order"));
+        assertEquals("Network error getting QR code for order: " + orderId, exception.getMessage());
+        assertNotNull(exception.getCause());
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.GET),
@@ -151,7 +144,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToPayed_Success() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/{orderId}/pay";
         ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.OK);
 
@@ -163,10 +155,8 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
         assertDoesNotThrow(() -> receiptProviderAdapter.updateToPayed(orderId));
 
-        // Verify
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.PATCH),
@@ -177,7 +167,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToPayed_Failure() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/{orderId}/pay";
         ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -189,11 +178,10 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ExternalServiceException exception = assertThrows(ExternalServiceException.class,
                 () -> receiptProviderAdapter.updateToPayed(orderId));
 
-        assertTrue(exception.getMessage().contains("Failed to update receipt to payed for order"));
+        assertEquals("Failed to update receipt to payed for order: " + orderId + ". Status: 400 BAD_REQUEST", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.PATCH),
@@ -204,7 +192,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToDelivered_Success() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/{orderId}/deliver";
         ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.OK);
 
@@ -216,10 +203,8 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
         assertDoesNotThrow(() -> receiptProviderAdapter.updateToDelivered(orderId));
 
-        // Verify
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.PATCH),
@@ -230,7 +215,6 @@ class ReceiptProviderAdapterTest {
 
     @Test
     void updateToDelivered_Failure() {
-        // Arrange
         String urlTemplate = baseUrl + basePath + "/{orderId}/deliver";
         ResponseEntity<Void> responseEntity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -242,11 +226,10 @@ class ReceiptProviderAdapterTest {
                 eq(orderId))
         ).thenReturn(responseEntity);
 
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ExternalServiceException exception = assertThrows(ExternalServiceException.class,
                 () -> receiptProviderAdapter.updateToDelivered(orderId));
 
-        assertTrue(exception.getMessage().contains("Failed to update receipt to delivered for order"));
+        assertEquals("Failed to update receipt to delivered for order: " + orderId + ". Status: 400 BAD_REQUEST", exception.getMessage());
         verify(restTemplate, times(1)).exchange(
                 eq(urlTemplate),
                 eq(HttpMethod.PATCH),

@@ -75,8 +75,8 @@ public class QRCode {
     private Date[] parseDates() throws QRValidationException {
         try {
             Date paymentProcessedDate = DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT);
-            Date receiptGeneratedDate = DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT);
-            return new Date[]{paymentProcessedDate, receiptGeneratedDate};
+            Date parsedReceiptDate = DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT);
+            return new Date[]{paymentProcessedDate, parsedReceiptDate};
         } catch (Exception e) {
             log.error("Invalid date format in QR code: {}", e.getMessage());
             throw new QRValidationException("QR Code is not valid");
