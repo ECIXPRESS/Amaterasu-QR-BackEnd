@@ -25,61 +25,89 @@ public class QRCode {
     private ReceiptStatus receiptStatus;
     private OrderStatus orderStatus;
 
-    public void validateQrCode(String qrCode) throws Exception {
-        List<String> qrCodeList = Arrays.stream(qrCode.split("_")).toList();
+    public void validateQrCode(String qrCodeString) throws Exception {
+        List<String> qrCodeList = Arrays.stream(qrCodeString.split("_")).toList();
+
+        if (qrCodeList.size() != 6) {
+            log.error("QR Code is not valid - wrong number of parts");
+            throw new Exception("QR Code is not valid");
+        }
+
         this.orderId = qrCodeList.get(0);
         this.receiptGeneratedDate = qrCodeList.get(1);
         this.paymentProcessedAt = qrCodeList.get(2);
-        this.paymentMethodType = PaymentMethodType.valueOf(qrCodeList.get(3));
-        this.receiptStatus = ReceiptStatus.valueOf(qrCodeList.get(4));
-        this.orderStatus = OrderStatus.valueOf(qrCodeList.get(5));
-        if(qrCodeList.size() != 6){
-            log.error("QR Code is not valid");
+
+        try {
+            this.paymentMethodType = PaymentMethodType.valueOf(qrCodeList.get(3));
+            this.receiptStatus = ReceiptStatus.valueOf(qrCodeList.get(4));
+            this.orderStatus = OrderStatus.valueOf(qrCodeList.get(5));
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid enum value in QR code: {}", e.getMessage());
             throw new Exception("QR Code is not valid");
         }
-        if(this.paymentMethodType == PaymentMethodType.CASH && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).after(new Date())) {
+
+        Date paymentProcessedDate;
+        Date receiptGeneratedDate;
+        try {
+            paymentProcessedDate = DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT);
+            receiptGeneratedDate = DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT);
+        } catch (Exception e) {
+            log.error("Invalid date format in QR code: {}", e.getMessage());
+            throw new Exception("QR Code is not valid");
+        }
+
+        if (this.paymentMethodType == PaymentMethodType.CASH && receiptGeneratedDate.after(new Date())) {
             log.error("Receipt generated date can't be after today if paying in cash");
             throw new Exception("QR Code is not valid");
         }
-        if(this.paymentMethodType != PaymentMethodType.CASH  && DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT).before(DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT))) {
+
+        if (this.paymentMethodType != PaymentMethodType.CASH && receiptGeneratedDate.before(paymentProcessedDate)) {
             log.error("Receipt generated date can't be before payment processed at");
             throw new Exception("QR Code is not valid");
         }
-        if(this.receiptStatus == ECIEXPRESS.Amaterasu_QR_BackEnd.Amaterasu_QR_BackEnd.Domain.Model.Enums.ReceiptStatus.DELIVERED){
+
+        if (this.receiptStatus == ReceiptStatus.DELIVERED) {
             log.error("Receipt can't be delivered in creation");
             throw new Exception("Receipt can't be delivered in creation");
         }
-        if(this.receiptStatus == ReceiptStatus.REFUNDED){
-            if (this.orderStatus == OrderStatus.DELIVERED){
+
+        if (this.receiptStatus == ReceiptStatus.REFUNDED) {
+            if (this.orderStatus == OrderStatus.DELIVERED) {
                 log.error("Receipt can't be refunded and delivered in creation");
                 throw new Exception("Receipt can't be refunded and delivered in creation");
             }
             log.error("Receipt can't be refunded in creation");
             throw new Exception("Receipt can't be refunded in creation");
         }
-        if(this.orderStatus == OrderStatus.DELIVERED){
-            if(this.receiptStatus == ReceiptStatus.PENDING){
+
+        if (this.orderStatus == OrderStatus.DELIVERED) {
+            if (this.receiptStatus == ReceiptStatus.PENDING) {
                 log.error("Receipt can't be pending and delivered");
                 throw new Exception("Receipt can't be pending and delivered");
             }
             log.error("Receipt can't be delivered in creation");
             throw new Exception("Receipt can't be delivered in creation");
         }
-        Date paymentProcessedAt =  DateUtils.parseDate(this.paymentProcessedAt, DateUtils.TIMESTAMP_FORMAT);
-        Date receiptGeneratedDate = DateUtils.parseDate(this.receiptGeneratedDate, DateUtils.TIMESTAMP_FORMAT);
-        if (this.paymentMethodType == PaymentMethodType.CASH){
-            if(this.receiptStatus == ReceiptStatus.PAYED){
+
+        if (this.paymentMethodType == PaymentMethodType.CASH) {
+            if (this.receiptStatus == ReceiptStatus.PAYED) {
                 log.error("Receipt can't be payed as cash in creation");
                 throw new Exception("Receipt can't be payed as cash in creation");
             }
-            if(paymentProcessedAt.before(receiptGeneratedDate)){
-                log.error("Payment processed at can't be before receipt generated date");
+            if (paymentProcessedDate.before(receiptGeneratedDate)) {
+                log.error("Payment processed at can't be before receipt generated date for CASH");
                 throw new Exception("Payment processed at can't be before receipt generated date");
             }
         }
-        else if(this.paymentMethodType == PaymentMethodType.BANK){
-            if(paymentProcessedAt.after(receiptGeneratedDate)){
-                log.error("Payment processed at can't be after receipt generated date");
+        else if (this.paymentMethodType == PaymentMethodType.BANK) {
+            if (paymentProcessedDate.after(receiptGeneratedDate)) {
+                log.error("Payment processed at can't be after receipt generated date for BANK");
+                throw new Exception("Payment processed at can't be after receipt generated date");
+            }
+        }
+        else if (this.paymentMethodType == PaymentMethodType.WALLET) {
+            if (paymentProcessedDate.after(receiptGeneratedDate)) {
+                log.error("Payment processed at can't be after receipt generated date for WALLET");
                 throw new Exception("Payment processed at can't be after receipt generated date");
             }
         }

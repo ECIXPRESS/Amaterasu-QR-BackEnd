@@ -58,9 +58,7 @@ class QRCodeTest {
         // Act & Assert
         Exception exception = assertThrows(Exception.class,
                 () -> qrCode.validateQrCode(invalidQR));
-
-        // Check that any exception is thrown (don't check exact message)
-        assertNotNull(exception);
+        assertEquals("QR Code is not valid", exception.getMessage());
     }
 
     @Test
