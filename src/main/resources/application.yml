@@ -36,13 +36,14 @@ qr:
     password: ${QR_ENCRYPTION_PASSWORD:ECIEXPRESS_QR_PASSWORD_2025}
     salt: ${QR_ENCRYPTION_SALT:1234567890abcdef}
 
-# Configuración de Microservicios Externos
+
 gateway:
   url: http://gateway:8081
 
+# Configuración de Microservicios Externos
 microservices:
   receipt:
-    base-path: /api/v1/receipts
+    base-path: /api/receipts
 
 # Configuración de Resilience4j para Circuit Breaker
 resilience4j:
