@@ -1,3 +1,2 @@
-microservices:
-  receipt:
-    url: http://receipt-service.dev.eciexpress.com
+gateway:
+  url: http://gateway:8081

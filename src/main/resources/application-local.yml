@@ -1,3 +1,2 @@
-microservices:
-  receipt:
-    url: http://localhost:8081
+gateway:
+  url: http://gateway:8081
