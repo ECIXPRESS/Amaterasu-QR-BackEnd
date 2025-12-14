@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8088
 
 spring:
   application:
@@ -39,12 +39,7 @@ qr:
 # Configuración de Microservicios Externos
 microservices:
   receipt:
-    url: http://localhost:8082
-    base-path: /api/v1/receipts
-    timeout: 5000
-    retry:
-      max-attempts: 3
-      backoff-delay: 1000
+    base-path: /v1/receipts
 
 # Configuración de Resilience4j para Circuit Breaker
 resilience4j:
