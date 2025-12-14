@@ -37,9 +37,12 @@ qr:
     salt: ${QR_ENCRYPTION_SALT:1234567890abcdef}
 
 # Configuración de Microservicios Externos
+gateway:
+  url: http://gateway:8081
+
 microservices:
   receipt:
-    base-path: /v1/receipts
+    base-path: /api/v1/receipts
 
 # Configuración de Resilience4j para Circuit Breaker
 resilience4j:
