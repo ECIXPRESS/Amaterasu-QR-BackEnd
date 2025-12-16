@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: amaterasu-qr-backend-test
+  main:
+    banner-mode: off
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+
+# src/test/resources/application.yml
+qr:
+  encryption:
+    password: "testpassword"
+    salt: "1234567890abcdef"
+# Disable Swagger for tests
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+  show-actuator: false
+
+# Mock external services
+microservices:
+  receipt:
+    url: http://localhost:9999
+    base-path: /api/v1/receipts
+    timeout: 100
+    retry:
+      max-attempts: 1
+      backoff-delay: 100
+
+# Disable circuit breaker for tests
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentService:
+        register-health-indicator: false
+      userService:
+        register-health-indicator: false
+
+logging:
+  level:
+    root: WARN
+    com.eci.qr: INFO
