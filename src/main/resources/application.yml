@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8088
 
 spring:
   application:
@@ -37,14 +37,12 @@ qr:
     salt: ${QR_ENCRYPTION_SALT:1234567890abcdef}
 
 # Configuración de Microservicios Externos
+gateway:
+  url: http://gateway:8081
+
 microservices:
   receipt:
-    url: http://localhost:8082
-    base-path: /api/v1/receipts
-    timeout: 5000
-    retry:
-      max-attempts: 3
-      backoff-delay: 1000
+    base-path: /api/receipts
 
 # Configuración de Resilience4j para Circuit Breaker
 resilience4j:
